@@ -1,4 +1,5 @@
 import React from "react";
+import './app.css'
 import ProductList from "./components/ProductList";
 import Basket from "./components/Basket";
 import { ProductProvider } from "./components/ProductContext";
@@ -8,10 +9,10 @@ function App() {
   return (
     <div className="App">
       <ProductProvider>
-        <Routes>
-          <Route path="/"  element={<ProductList/>} />
-          <Route path="/basket" element={<Basket/>} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<ProductList />} />
+        <Route path="/basket" element={<Basket />} />
+      </Routes>
       </ProductProvider>
     </div>
   );

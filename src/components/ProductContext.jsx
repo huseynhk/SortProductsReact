@@ -13,18 +13,22 @@ const ProductProvider = ({ children }) => {
     search: "",
   });
   const [basket, setBasket] = useState([]);
+  const [productCountInBasket, setProductCountInBasket] = useState(0);
 
-  const fetchData = async () => {
-    try {
-      const response = await fetch("https://fakestoreapi.com/products");
-      const json = await response.json();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("https://fakestoreapi.com/products");
+        const json = await response.json();
 
-      setProducts(json);
-      setFilteredProducts(json);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
-  };
+        setProducts(json);
+        setFilteredProducts(json);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const applyFilters = () => {
     let filtered = [...products];
@@ -79,25 +83,101 @@ const ProductProvider = ({ children }) => {
     sortProducts(filteredProducts, newSortBy);
   };
 
+  // const addToBasket = (productId) => {
+  //   const productToAdd = products.find((product) => product.id === productId);
+  //   console.log(productToAdd);
+  //   if (productToAdd) {
+  //     setBasket([...basket, productToAdd]);
+  //     setProductCountInBasket((prevCount) => prevCount + 1);
+  //     localStorage.setItem(
+  //       "basketArray",
+  //       JSON.stringify([...basket, productToAdd])
+  //     );
+
+  //   }
+  // };
+
   const addToBasket = (productId) => {
     const productToAdd = products.find((product) => product.id === productId);
-    console.log(productToAdd);
     if (productToAdd) {
-      setBasket([...basket, productToAdd]);
+      const updatedBasket = [...basket, { ...productToAdd, quantity: 1 }];
+      setBasket(updatedBasket);
+      setProductCountInBasket((prevCount) => prevCount + 1);
+      localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
     }
   };
-
   console.log(basket);
 
   const removeFromBasket = (productId) => {
     const updatedBasket = basket.filter((product) => product.id !== productId);
+    console.log(updatedBasket.length);
     setBasket(updatedBasket);
+    localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
+    setProductCountInBasket((prevCount) => prevCount - 1);
+    updateProductCountInBasket();
   };
 
   const isInBasket = (productId) => {
-    const isProduct = basket.some((product) => product.id === productId);
+    const isProduct = basket.find((product) => product.id === productId); //some
     // console.log(isProduct);
     return isProduct;
+  };
+
+  const incrementQuantity = (productId) => {
+    const updatedBasket = basket.map((product) =>
+      product.id === productId
+        ? { ...product, quantity: product.quantity + 1 }
+        : product
+    );
+    setBasket(updatedBasket);
+    setProductCountInBasket((prevCount) => prevCount + 1);
+    localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
+    updateProductCountInBasket();
+  };
+
+  const decrementQuantity = (productId) => {
+    const updatedBasket = basket.map((product) =>
+      product.id === productId
+        ? { ...product, quantity: Math.max(1, product.quantity - 1) }
+        : product
+    );
+    setBasket(updatedBasket);
+
+    if (productCountInBasket > updatedBasket.length) {
+      setProductCountInBasket((prevCount) => prevCount - 1);
+    }
+    localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
+    updateProductCountInBasket();
+  };
+
+  const calculateProductTotal = (product) => {
+    return (product.price * product.quantity).toFixed(2);
+  };
+
+  const calculateTotalPrice = () => {
+    const total = basket.reduce(
+      (total, product) => total + product.price * product.quantity,
+      0
+    );
+    const roundTotal = Math.round(total);
+    return roundTotal;
+  };
+
+  const updateProductCountInBasket = () => {
+    const count = basket.reduce(
+      (total, product) => total + product.quantity,
+      0
+    );
+    setProductCountInBasket(count);
+  };
+
+  useEffect(() => {
+    updateProductCountInBasket();
+  }, [basket]);
+
+  const deleteAll = () => {
+    setBasket([]);
+    localStorage.setItem("basketArray", JSON.stringify([]));
   };
 
   const value = {
@@ -106,12 +186,20 @@ const ProductProvider = ({ children }) => {
     sortBy,
     doSortChange,
     filteredProducts,
-    fetchData,
     addToBasket,
     removeFromBasket,
     isInBasket,
     products,
     applyFilters,
+    basket,
+    setBasket,
+    productCountInBasket,
+    setProductCountInBasket,
+    incrementQuantity,
+    decrementQuantity,
+    calculateTotalPrice,
+    calculateProductTotal,
+    deleteAll,
   };
 
   return (
