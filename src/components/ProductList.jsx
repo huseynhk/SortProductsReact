@@ -8,21 +8,39 @@ const ProductList = () => {
     filters,
     setFilters,
     sortBy,
-    doSortChange,
     filteredProducts,
     addToBasket,
     isInBasket,
     products,
     applyFilters,
-    productCountInBasket,
-    setProductCountInBasket,
+    quantity,
+    setQuantity,
     setBasket,
+    setProducts,
+    setFilteredProducts,
+    sortProducts,
+    setSortBy
   } = useContext(ProductContext);
+
+  const fetchData = async () => {
+    try {
+      const response = await fetch("https://fakestoreapi.com/products");
+      const json = await response.json();
+      console.log(json);
+      setProducts(json);
+      setFilteredProducts(json);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const savedBasket = JSON.parse(localStorage.getItem("basketArray")) || [];
     setBasket(savedBasket);
-    setProductCountInBasket(savedBasket.length);
+    setQuantity(savedBasket.length);
   }, []);
 
   useEffect(() => {
@@ -30,18 +48,15 @@ const ProductList = () => {
   }, [filters, products]);
 
 
-
   return (
     <>
       <div className="bg-orange-600 h-32">
         <h1 className="text-4xl font-bold mb-4 text-white ml-44">TrendYol</h1>
-        <div className="flex mb-4 space-x-4 ml-28">
+        <div className="flex mb-4 space-x-6 ml-28">
           <span>
             <Link to="/basket" className="text-white">
               <div className="flex justify-center items-center rounded-xl bg-gray-300 px-4 h-12">
-                <span className="mr-2 text-3xl text-red-900">
-                  {productCountInBasket}
-                </span>
+                <span className="mr-2 text-3xl text-red-900">{quantity}</span>
                 <span className="text-3xl text-red-900">
                   <BsFillBasket2Fill />
                 </span>
@@ -60,7 +75,11 @@ const ProductList = () => {
           <select
             className="p-2 border rounded"
             value={sortBy}
-            onChange={doSortChange}
+            onChange={(e) => {
+              setSortBy(e.target.value);
+              sortProducts(filteredProducts, e.target.value);
+            }}
+          
           >
             <option value="title">Sort by Title</option>
             <option value="price">Sort by Price</option>
@@ -94,7 +113,7 @@ const ProductList = () => {
         </div>
       </div>
 
-      <ul className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-4">
+      <ul className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 m-4">
         {filteredProducts.map((product) => (
           <li key={product.id} className="bg-white rounded-lg shadow-md p-4">
             <h2 className="text-lg font-semibold text-blue-600 mb-3">

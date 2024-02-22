@@ -8,21 +8,21 @@ const Basket = () => {
     basket,
     setBasket,
     removeFromBasket,
-    setProductCountInBasket,
-    productCountInBasket,
+    quantity,
+    setQuantity,
     incrementQuantity,
     decrementQuantity,
     calculateTotalPrice,
     calculateProductTotal,
     deleteAll,
   } = useContext(ProductContext);
-  console.log(basket);
 
   useEffect(() => {
     const savedBasket = JSON.parse(localStorage.getItem("basketArray")) || [];
     setBasket(savedBasket);
-    setProductCountInBasket(savedBasket.length);
+    setQuantity(savedBasket.length);
   }, []);
+
 
 
 
@@ -41,7 +41,7 @@ const Basket = () => {
           </button>
           <div className="flex justify-center items-center rounded-xl bg-gray-300 px-4 h-12 mx-4">
             <span className="text-3xl text-red-900">
-              Product Count : {productCountInBasket}
+              Product Count : {quantity}
             </span>
           </div>
           <Link to="/" className="text-white">

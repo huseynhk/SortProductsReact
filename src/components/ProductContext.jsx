@@ -13,22 +13,7 @@ const ProductProvider = ({ children }) => {
     search: "",
   });
   const [basket, setBasket] = useState([]);
-  const [productCountInBasket, setProductCountInBasket] = useState(0);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("https://fakestoreapi.com/products");
-        const json = await response.json();
-
-        setProducts(json);
-        setFilteredProducts(json);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-    fetchData();
-  }, []);
+  const [quantity, setQuantity] = useState(0);
 
   const applyFilters = () => {
     let filtered = [...products];
@@ -58,7 +43,6 @@ const ProductProvider = ({ children }) => {
     }
 
     setFilteredProducts(filtered);
-    sortProducts(filtered, sortBy);
   };
 
   const sortProducts = (productsToSort, sortBy) => {
@@ -77,43 +61,37 @@ const ProductProvider = ({ children }) => {
     setFilteredProducts(sortedProducts);
   };
 
-  const doSortChange = (e) => {
-    const newSortBy = e.target.value;
-    setSortBy(newSortBy);
-    sortProducts(filteredProducts, newSortBy);
-  };
-
-  // const addToBasket = (productId) => {
-  //   const productToAdd = products.find((product) => product.id === productId);
-  //   console.log(productToAdd);
-  //   if (productToAdd) {
-  //     setBasket([...basket, productToAdd]);
-  //     setProductCountInBasket((prevCount) => prevCount + 1);
-  //     localStorage.setItem(
-  //       "basketArray",
-  //       JSON.stringify([...basket, productToAdd])
-  //     );
-
-  //   }
-  // };
+ 
 
   const addToBasket = (productId) => {
     const productToAdd = products.find((product) => product.id === productId);
+    const exist = basket.find((product) => product.id === productId);
     if (productToAdd) {
-      const updatedBasket = [...basket, { ...productToAdd, quantity: 1 }];
-      setBasket(updatedBasket);
-      setProductCountInBasket((prevCount) => prevCount + 1);
-      localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
+      if (exist) {
+        alert("This product is already in your basket!");
+        // const updatedBasket = basket.map((item) =>
+        //   item.id === productId ? { ...item, quantity: item.quantity + 1 } : item
+        // );
+        // setBasket(updatedBasket);
+        // setQuantity((prevCount) => prevCount + 1);
+        // localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
+      } else {
+        const updatedBasket = [...basket, { ...productToAdd, quantity: 1 }];
+        setBasket(updatedBasket);
+        setQuantity((prevCount) => prevCount + 1);
+        localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
+      }
+    } else {
+      alert("Product not found!");
     }
   };
-  console.log(basket);
 
   const removeFromBasket = (productId) => {
     const updatedBasket = basket.filter((product) => product.id !== productId);
     console.log(updatedBasket.length);
     setBasket(updatedBasket);
     localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
-    setProductCountInBasket((prevCount) => prevCount - 1);
+    setQuantity((prevCount) => prevCount - 1);
     updateProductCountInBasket();
   };
 
@@ -130,7 +108,7 @@ const ProductProvider = ({ children }) => {
         : product
     );
     setBasket(updatedBasket);
-    setProductCountInBasket((prevCount) => prevCount + 1);
+    setQuantity((prevCount) => prevCount + 1);
     localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
     updateProductCountInBasket();
   };
@@ -143,9 +121,9 @@ const ProductProvider = ({ children }) => {
     );
     setBasket(updatedBasket);
 
-    if (productCountInBasket > updatedBasket.length) {
-      setProductCountInBasket((prevCount) => prevCount - 1);
-    }
+    // if (quantity > updatedBasket.length) {
+    //   setQuantity((prevCount) => prevCount - 1);
+    // }
     localStorage.setItem("basketArray", JSON.stringify(updatedBasket));
     updateProductCountInBasket();
   };
@@ -168,7 +146,7 @@ const ProductProvider = ({ children }) => {
       (total, product) => total + product.quantity,
       0
     );
-    setProductCountInBasket(count);
+    setQuantity(count);
   };
 
   useEffect(() => {
@@ -184,22 +162,26 @@ const ProductProvider = ({ children }) => {
     filters,
     setFilters,
     sortBy,
-    doSortChange,
+    setSortBy,
     filteredProducts,
     addToBasket,
     removeFromBasket,
     isInBasket,
     products,
+    setProducts,
     applyFilters,
     basket,
     setBasket,
-    productCountInBasket,
-    setProductCountInBasket,
+    quantity,
+    setQuantity,
     incrementQuantity,
     decrementQuantity,
     calculateTotalPrice,
     calculateProductTotal,
     deleteAll,
+    setFilteredProducts,
+    sortProducts,
+    
   };
 
   return (
