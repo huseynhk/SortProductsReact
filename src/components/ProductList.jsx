@@ -2,6 +2,8 @@ import React, { useEffect, useContext } from "react";
 import { ProductContext } from "./ProductContext";
 import { Link } from "react-router-dom";
 import { BsFillBasket2Fill } from "react-icons/bs";
+import axios from "axios";
+import { GetProducts } from "../service/api";
 
 const ProductList = () => {
   const {
@@ -19,19 +21,35 @@ const ProductList = () => {
     setProducts,
     setFilteredProducts,
     sortProducts,
-    setSortBy
+    setSortBy,
   } = useContext(ProductContext);
 
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await fetch("https://fakestoreapi.com/products");
+  //     const json = await response.json();
+  //     console.log(json);
+  //     setProducts(json);
+  //     setFilteredProducts(json);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
+
+  // const fetchData = async () => {
+  //   try {
+  //     const response = await axios.get("https://fakestoreapi.com/products");
+  //     setProducts(response.data);
+  //     setFilteredProducts(response.data);
+  //   } catch (error) {
+  //     console.error("Error fetching data:", error);
+  //   }
+  // };
+
   const fetchData = async () => {
-    try {
-      const response = await fetch("https://fakestoreapi.com/products");
-      const json = await response.json();
-      console.log(json);
-      setProducts(json);
-      setFilteredProducts(json);
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    }
+    const response = await GetProducts();
+    setProducts(response);
+    setFilteredProducts(response);
   };
   useEffect(() => {
     fetchData();
@@ -46,7 +64,6 @@ const ProductList = () => {
   useEffect(() => {
     applyFilters();
   }, [filters, products]);
-
 
   return (
     <>
@@ -79,7 +96,6 @@ const ProductList = () => {
               setSortBy(e.target.value);
               sortProducts(filteredProducts, e.target.value);
             }}
-          
           >
             <option value="title">Sort by Title</option>
             <option value="price">Sort by Price</option>
